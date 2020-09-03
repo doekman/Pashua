@@ -39,7 +39,7 @@
     chooseFiles = YES;
 
     // Set button appearance
-    [self setButtonType:NSMomentaryPushButton];
+    [self setButtonType:NSButtonTypeMomentaryLight];
     [self setBezelStyle:NSRoundedBezelStyle];
 
     // Init array of allowed filetypes
