@@ -106,20 +106,36 @@
     if ([pathField stringValue]) {
         NSFileManager *fm = [NSFileManager defaultManager];
         defaultPath = [[NSString stringWithString:[pathField stringValue]] stringByResolvingSymlinksInPath];
-        if (![fm fileExistsAtPath:defaultPath]) {
-            defaultPath = nil;
+        if ([fm fileExistsAtPath:defaultPath]) {
+            [panel setDirectoryURL:[NSURL fileURLWithPath:defaultPath]];
         }
     }
 
-    [panel beginSheetForDirectory:defaultPath
-                              file:[defaultPath lastPathComponent]
-                             types:[filetypes count] ? filetypes : nil
-                    modalForWindow:[self window]
-                     modalDelegate:self
-                    didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)
-                       contextInfo:nil];
+    [panel setAllowedFileTypes:[filetypes count] ? filetypes : nil];
+
+    [panel beginSheetModalForWindow:[self window]
+                  completionHandler:^(NSModalResponse result) {
+                      [self sheetDidEnd:result panel:panel];
+                  }];
+    /*
+    [panel beginSheetForDirectory:defaultPath                                         //directoryURL
+                              file:[defaultPath lastPathComponent]                    //NO EQUIVALENT?
+                             types:[filetypes count] ? filetypes : nil                //allowedFileTypes
+                    modalForWindow:[self window]                                      //beginSheetModalForWindow
+                     modalDelegate:self                                               //NO EQUIVALENT?
+                    didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)     //completionHandler
+                       contextInfo:nil];                                              //NO EQUIVALENT?
+     */
 }
 
+- (void)sheetDidEnd:(NSModalResponse)result panel:(NSOpenPanel *)sheet {
+    if (result == NSFileHandlingPanelOKButton) {
+        [pathField setStringValue:[[sheet URL] path]];
+        [clearButton setHidden:NO];
+    }
+}
+
+// Kan straks weg
 - (void)sheetDidEnd:(id)sheet returnCode:(int)rc contextInfo:(id)cinfo {
     if (NSOKButton == rc) {
         [pathField setStringValue:[sheet filename]];
